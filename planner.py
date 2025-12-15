@@ -9,6 +9,8 @@ __all__ = [
 
 class Specialization(dict):
 
+    name = None
+
     def __getitem__(self, key):
         if key in self.keys():
             return super().__getitem__(key)
