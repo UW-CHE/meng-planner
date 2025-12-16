@@ -3,10 +3,19 @@ from base import (
     Degree,
 )
 
+# The following is the default settings for these options
+# class Degree(dict):
+#     name = None
+#     max_per_term = [3, 3, 3]
+#     N_required = 8
+#     required = []
+#     optional = []
+#     N_outside = 2
+
 
 class AccelMEngMLAI(Specialization):
     name = 'Accel MEng in AI/ML'
-    N_per_term = [1, 1, 3, 3]
+    max_per_term = [1, 1, 3, 3]
     N_required = 8
     required = ['CHE523', 'CHE626']
     optional = ['CHE520', 'CHE521', 'CHE522', 'CHE621', 'CHE620']
@@ -14,7 +23,7 @@ class AccelMEngMLAI(Specialization):
 
 class MEngMLAI(Specialization):
     name = 'MEng in AI/ML'
-    N_per_term = [3, 3, 3]
+    max_per_term = [3, 3, 3]
     N_required = 8
     required = ['CHE523', 'CHE626']
     optional = ['CHE520', 'CHE521', 'CHE522', 'CHE621', 'CHE620']
@@ -22,15 +31,23 @@ class MEngMLAI(Specialization):
 
 class MEng(Degree):
     name = 'MEng'
-    N_per_term = [3, 3, 3]
+    max_per_term = [3, 3, 3]
     N_required = 8
     required = []
     optional = []
 
 
-class MEngCoop(Degree):
-    name = 'MEng Coop'
-    N_per_term = [3, 3, 0, 0, 3]
+class MEngCoop1Term(Degree):
+    name = 'MEng Coop - 1 Term'
+    max_per_term = [3, 3, 0, 3]
+    N_required = 8
+    required = []
+    optional = []
+
+
+class MEngCoop2Term(Degree):
+    name = 'MEng Coop - 2 Term'
+    max_per_term = [3, 3, 0, 0, 3]
     N_required = 8
     required = []
     optional = []
@@ -38,7 +55,7 @@ class MEngCoop(Degree):
 
 class AccelMEngSEAM(Specialization):
     name = 'Accel MEng in Sustainable Energy & Materials'
-    N_per_term = [1, 1, 3, 3]
+    max_per_term = [1, 1, 3, 3]
     N_required = 8
     required = ['SEED671', 'SEED681']
     optional = ['CHE571', 'CHE572', 'CHE514', 'CHE602']
@@ -46,7 +63,7 @@ class AccelMEngSEAM(Specialization):
 
 class MEngHLTH(Specialization):
     name = 'Accel MEng in Health Technologies'
-    N_per_term = [3, 3, 3]
+    max_per_term = [3, 3, 3]
     N_required = 9
     required = ['PHIL699', 'ECON622']
     optional = ['HLTH680', 'HLTH681', 'HLTH683', 'HLTH687']
