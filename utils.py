@@ -7,7 +7,7 @@ __all__ = [
     'reset_state',
     'add_header'
 ]
-    
+
 
 def make_pretty(styler):
     # styler.hide()
@@ -20,7 +20,8 @@ def reset_state():
     for k in st.session_state.keys():
         if k.startswith('checkbox'):
             st.session_state[k] = False
-    st.session_state['courses'].clear()
+    st.session_state['plan'].clear()
+
 
 def add_header(term):
     if term.endswith('9'):
