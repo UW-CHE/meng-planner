@@ -15,7 +15,7 @@ class Degree(dict):
     required = []
     optional = []
     N_outside = 2
-    start_term = None
+    start_term = '1579'
  
     def __getitem__(self, key):
         if key in self.keys():

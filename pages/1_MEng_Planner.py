@@ -9,6 +9,10 @@ from utils import (
 )
 import options
 
+st.set_page_config(
+    page_title="MEng Planner",
+    page_icon=":calendar:",
+)
 
 st.title(":calendar: MEng Planner")
 st.set_page_config(layout="wide")
@@ -27,9 +31,8 @@ program_name = st.sidebar.selectbox(
 )
 # Extract selected program
 program = [p for p in programs if p.name == program_name]
-# Instantiate program class
-plan = program[0]()
-st.session_state['plan'] = plan
+plan = program[0]()  # Instantiate plan object
+st.session_state['plan'] = plan  # Store plan in state
 
 # Deal with starting term by generating a long list of future term numbers
 terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]
@@ -50,12 +53,12 @@ with st.expander('Course Schedule', expanded=False):
     incl_seed = st.checkbox('Include SEED Courses', value="Sustainable" in plan.name)
     incl_hlth = st.checkbox('Include HLTH Courses', value='Health Tech' in plan.name)
     dfs = []
-    dfs.append(pd.read_csv('schedule_500.csv', skipinitialspace=True))
-    dfs.append(pd.read_csv('schedule_600.csv', skipinitialspace=True))
+    dfs.append(pd.read_csv('./schedules/schedule_500.csv', skipinitialspace=True))
+    dfs.append(pd.read_csv('./schedules/schedule_600.csv', skipinitialspace=True))
     if incl_hlth:
-        dfs.append(pd.read_csv('schedule_HLTH.csv', skipinitialspace=True))
+        dfs.append(pd.read_csv('./schedules/schedule_HLTH.csv', skipinitialspace=True))
     if incl_seed:
-        dfs.append(pd.read_csv('schedule_SEED.csv', skipinitialspace=True))
+        dfs.append(pd.read_csv('./schedules/schedule_SEED.csv', skipinitialspace=True))
     df = pd.concat(dfs, ignore_index=True)
     df.set_index('Course', inplace=True)
     for col in df.keys():  # Remove terms prior to start date

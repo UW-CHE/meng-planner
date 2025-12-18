@@ -3,15 +3,6 @@ from base import (
     Degree,
 )
 
-# The following is the default settings for these options
-# class Degree(dict):
-#     name = None
-#     max_per_term = [3, 3, 3]
-#     N_required = 8
-#     required = []
-#     optional = []
-#     N_outside = 2
-
 
 class AccelMEngMLAI(Specialization):
     name = 'Accel MEng in AI/ML'
