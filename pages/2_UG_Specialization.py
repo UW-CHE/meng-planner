@@ -7,7 +7,7 @@ from utils import (
     reset_state_ug,
     reset_state,
     add_header,
-    ug_course_selector,
+    ug_course_schedule,
 )
 import ug_specializations
 
@@ -47,7 +47,7 @@ if st.sidebar.button('Reset'):
     reset_state()
 
 # Generate the upcoming roster of classes and show in a table
-df = ug_course_selector()
+df = ug_course_schedule()
 
 # Generate the columns for each term
 start_j = terms.index(plan.start_term)

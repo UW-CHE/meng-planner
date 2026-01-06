@@ -1,18 +1,20 @@
 import matplotlib.pyplot as plt
 import streamlit as st
 import pandas as pd
+from importlib import import_module
+import meng_options
 
 
 __all__ = [
     'make_pretty',
     'reset_state',
     'add_header'
-    'meng_course_selector',
-    'ug_course_selector'
+    'meng_course_schedule',
+    'ug_course_schedule'
 ]
 
 
-def ug_course_selector():
+def ug_course_schedule(start_term='0'):
     with st.expander('Course Schedule', expanded=False):
         incl_mme = st.checkbox('Include MME Courses')
         incl_earth = st.checkbox('Include EARTH Courses')
@@ -24,20 +26,20 @@ def ug_course_selector():
             dfs.append(pd.read_csv('./schedules/schedule_EARTH.csv', skipinitialspace=True))
         df = pd.concat(dfs, ignore_index=True)
         df.set_index('Course', inplace=True)
+        for col in df.keys():  # Remove terms prior to start date
+            if col < start_term:
+                del df[col]
         st.dataframe(df.style.pipe(make_pretty))
         return df
 
 
-def meng_course_selector(plan):
+def meng_course_schedule(start_term='0'):
     with st.expander('Course Schedule', expanded=False):
-        incl_earth = st.checkbox('Include EARTH Courses')
-        incl_seed = st.checkbox('Include SEED Courses', value="Sustainable" in plan.name)
-        incl_hlth = st.checkbox('Include HLTH Courses', value='Health Tech' in plan.name)
+        incl_seed = st.checkbox('Include SEED Courses')
+        incl_hlth = st.checkbox('Include HLTH Courses')
         dfs = []
         dfs.append(pd.read_csv('./schedules/schedule_500.csv', skipinitialspace=True))
         dfs.append(pd.read_csv('./schedules/schedule_600.csv', skipinitialspace=True))
-        if incl_earth:
-            dfs.append(pd.read_csv('./schedules/schedule_EARTH.csv', skipinitialspace=True))
         if incl_hlth:
             dfs.append(pd.read_csv('./schedules/schedule_HLTH.csv', skipinitialspace=True))
         if incl_seed:
@@ -45,7 +47,7 @@ def meng_course_selector(plan):
         df = pd.concat(dfs, ignore_index=True)
         df.set_index('Course', inplace=True)
         for col in df.keys():  # Remove terms prior to start date
-            if col < plan.start_term:
+            if col < start_term:
                 del df[col]
         st.dataframe(df.style.pipe(make_pretty))
         return df
@@ -88,3 +90,23 @@ def add_header(term):
     elif term.endswith('1'):
         st.header("Winter :snowflake:")
     st.markdown(f"**Term: {term}**")
+
+
+def get_meng_programs():
+    programs = []
+    for n in dir(meng_options):
+        if not n.startswith('_'):
+            globals()[n] = getattr(import_module('meng_options'), n)
+            programs.append(globals()[n])
+    programs = [p for p in programs if p.name]
+    return programs
+
+
+def reset_courses():
+    for item in st.session_state.keys():
+        if item.startswith('box_'):
+            st.session_state[item] = False
+    try:
+        del st.session_state['df_taken']
+    except:
+        pass

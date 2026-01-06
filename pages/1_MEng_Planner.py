@@ -1,48 +1,34 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from importlib import import_module
 from utils import (
-    make_pretty,
-    reset_state_meng,
     reset_state,
+    reset_courses,
     add_header,
-    meng_course_selector,
+    meng_course_schedule,
+    get_meng_programs,
 )
-import meng_options
+
 
 st.set_page_config(
     page_title="MEng Planner",
     page_icon=":calendar:",
 )
-
 st.title(":calendar: MEng Planner")
 st.set_page_config(layout="wide")
 
-# Import all options into list of programs
-programs = []
-for n in dir(meng_options):
-    if not n.startswith('_'):
-        globals()[n] = getattr(import_module('meng_options'), n)
-        programs.append(globals()[n])
+# Generate list of available programs
+programs = get_meng_programs()
 
-cols = st.sidebar.columns((0.6, 0.4), vertical_alignment='bottom')
-with cols[0]:  # Generate selectbox of programs
-    program_name = st.selectbox(
-        label='Choose Program', 
-        options=[p.name for p in programs if p.name], 
-        # on_change=reset_state_meng,
-    )
-with cols[1]:  # Apply selected program
-    if st.button('Apply'):
-        program = [p for p in programs if p.name == program_name]
-        plan = program[0]()
-        st.session_state['plan'] = plan  # Store plan in state
-    else:
-        try:
-            plan = st.session_state['plan'] 
-        except KeyError:
-            pass
+# Populate sidebar with some dropdown boxes
+program_name = st.sidebar.selectbox(
+    label='Choose Program', 
+    options=[p.name for p in programs], 
+    # on_change=reset_state_meng,
+)
+program = [p for p in programs if p.name == program_name]
+plan = program[0]()
+st.session_state['plan'] = plan  # Store plan in state
 
 # Deal with starting term by generating a long list of future term numbers
 terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]
@@ -57,58 +43,42 @@ plan.start_term = st.sidebar.selectbox(
 # Add a reset button to side bar
 if st.sidebar.button('Reset'):
     reset_state()
+    reset_courses()
 
 # Generate the upcoming roster of classes and show in a table
-df = meng_course_selector(plan)
+df_offered = meng_course_schedule(plan.start_term)
+df_taken = df_offered.copy()
+df_taken = df_taken.iloc[:, :4]
+df_taken.iloc[:] = False
+st.session_state['df_taken'] = df_taken
 
-# Add UG courses to list of ineligible
-try:
-    plan.ineligible = st.session_state['ug_plan'].courses
-except KeyError:
-    plan.ineligible = []
-
-# Generate the columns for each term
-start_j = terms.index(plan.start_term)
-cols = st.columns(len(plan.max_per_term))
-i = 0  # This is used to generate a unique key for each checkbox
-for j, col in enumerate(cols):
-    term = terms[start_j + j]
-    plan[term] = []
-    with col:
+cols = st.columns(len(st.session_state['df_taken'].keys()))
+cols = {term: cols[i] for i, term in enumerate(st.session_state['df_taken'].keys())}
+for term in st.session_state['df_taken'].keys():
+    with cols[term]:
         add_header(term)
-        with st.container(border=True):
-            if plan.max_per_term[j] == 0:
-                st.write("This is a coop term")
+        for course in df_offered.index[df_offered[term] == 1]:
+            mark = ' :star:' if course in plan.prescribed_courses else ''
+            key = 'box_'+term+course
+            label = course+mark
+            disabled = st.session_state['df_taken'].loc[course].sum() > 0
+            if disabled:  # Turn off box and set it to unchecked
+                st.session_state[key] = False
+                st.checkbox(label=label, key=key, disabled=True)
             else:
-                # Add specialization courses to column
-                if len(plan.required) > 0:
-                    st.markdown('*Specialization Courses*')
-                    for item in plan.prescribed_courses:
-                        if df.loc[item][term]:
-                            if item in plan.courses:
-                                st.checkbox(item, key=f'checkbox_{i}', value=True, disabled=True)
-                            elif item in plan.ineligible:
-                                st.checkbox(item, key=f'checkbox_{i}', value=False, disabled=True, help='This is already taken')
-                            else:
-                                if st.checkbox(item, value=False, key=f'checkbox_{i}'):
-                                    plan[term].append(item)
-                            i += 1
-                    st.divider()
-                # Now add remainder of courses
-                st.markdown('*General Courses*')
-                for item in df.index:
-                    if (df.loc[item][term]) and (item not in plan.prescribed_courses):
-                        if item in plan.courses:
-                            st.checkbox(item, key=f'checkbox_{i}', value=True, disabled=True)
-                        elif item in plan.ineligible:
-                            st.checkbox(item, key=f'checkbox_{i}', value=False, disabled=True)
-                        else:
-                            if st.checkbox(item, value=False, key=f'checkbox_{i}'):
-                                plan[term].append(item)
-                        i += 1
+                val = st.checkbox(label=label, key=key)
+                st.session_state['df_taken'][term].loc[course] = val
+                if val:
+                    plan[course] = term
+
+# st.write(st.session_state['df_taken'])
+st.sidebar.divider()
+with st.sidebar.expander('Show plan'):
+    st.write('Course : Term')
+    st.write(plan)
 
 # Check to ensure no problems are found with selections
-overload = np.array(plan.count_per_term) > np.array(plan.max_per_term)
+overload = st.session_state['df_taken'].sum(axis=0) > np.array(plan.max_per_term)
 if np.any(overload):
     i = np.where(overload)[0][0]
     st.error(f'No more than {plan.max_per_term[i]} courses may be taken in term {i+1}')
@@ -120,16 +90,15 @@ elif plan.count_nonCHE() > plan.N_outside:
     st.error(f'No more than {N} courses can be from outside CHE or NANO')
 else:  # Count the number of courses and generate progress bars and messages
     pcol1 = st.columns(2, vertical_alignment='center')
-    if len(plan.required) > 0:
-        with pcol1[0]:
-            pbar1 = st.progress(0)
-            N = 4
-            pbar1.progress(min(N, plan.specialization_count())/N)
-        with pcol1[1]:
-            if plan.specialization_achieved():
-                st.success('Specialization achieved!')
-            else:
-                st.error('Specialization requirements not met')
+    with pcol1[0]:
+        pbar1 = st.progress(0)
+        N = 4
+        pbar1.progress(min(N, plan.specialization_count())/N)
+    with pcol1[1]:
+        if plan.specialization_achieved():
+            st.success('Specialization achieved!')
+        else:
+            st.error('Specialization requirements not met')
     pcol2 = st.columns(2, vertical_alignment='center')
     with pcol2[0]:
         pbar2 = st.progress(0)
@@ -141,5 +110,4 @@ else:  # Count the number of courses and generate progress bars and messages
         else:
             st.error('Degree requirements not met')
 
-if st.checkbox('Show plan'):
-    st.write(plan)
+

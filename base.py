@@ -31,14 +31,16 @@ class Degree(dict):
 
     @property
     def courses(self):
-        courses  = []
-        for term in self.keys():
-            courses.extend(self[term])
+        courses = list(self.keys())
         return courses
     
     @property
     def count_per_term(self):
-        count = [len(self[term]) for term in self.keys()]
+        count = {}
+        for course in self.keys():
+            if self[course] not in count.keys():
+                count[self[course]] = 0
+            count[self[course]] += 1
         return count
 
     def degree_achieved(self):
@@ -46,7 +48,7 @@ class Degree(dict):
         
     def count_500s(self):
         count = 0
-        for course in self.courses:
+        for course in self.keys():
             if course[3] == '5':
                 count += 1
         return count
