@@ -14,6 +14,7 @@ class Degree(dict):
     N_required = 8
     required = []
     optional = []
+    ineligible = []
     N_outside = 2
     start_term = '1579'
  
