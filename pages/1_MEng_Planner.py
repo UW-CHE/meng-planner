@@ -61,7 +61,15 @@ for term in cols.keys():
             mark = ' :star:' if course in st.session_state['meng_plan'].prescribed_courses else ''
             key = 'box_'+term+course
             label = course+mark
-            st.checkbox(label=label, key=key, on_change=update_boxes, args=(term, course), disabled=st.session_state['disable'][key])
+            value = st.session_state['meng_plan'][course] == term
+            st.checkbox(
+                label=label, 
+                key=key, 
+                on_change=update_boxes, 
+                args=(term, course), 
+                disabled=st.session_state['disable'][key],
+                value=value,
+            )
 
 st.sidebar.divider()
 with st.sidebar.expander('Show MEng plan', expanded=True):
