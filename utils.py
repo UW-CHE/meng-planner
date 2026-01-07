@@ -126,12 +126,12 @@ def reset_boxes():
         pass
 
 
-def update_boxes(term, course):
+def update_boxes(term, course, plan):
     key = 'box_'+term+course
     for item in st.session_state.keys():
         if item.startswith('box_') and item.endswith(course) and (item != key):
-            st.session_state['disable'][item] = not st.session_state['disable'][item]
-            if st.session_state[key] is True:
-                st.session_state['meng_plan'][course] = term
-            else:
-                _ = st.session_state['meng_plan'].pop(course, None)
+            st.session_state['disable'][item] = st.session_state[key]
+    if st.session_state[key] is True:
+        st.session_state[plan][course] = term
+    else:
+        _ = st.session_state[plan].pop(course, None)

@@ -59,14 +59,16 @@ for term in cols.keys():
         add_header(term)
         for course in df_meng.index[df_meng[term] == 1]:
             mark = ' :star:' if course in st.session_state['meng_plan'].prescribed_courses else ''
-            key = 'box_'+term+course
+            key = 'box_'+term+course  
+            # I think key needs to include meng and ug so they don't interfere
+            # This applies to the disable flag especially
             label = course+mark
             value = st.session_state['meng_plan'][course] == term
             st.checkbox(
                 label=label, 
                 key=key, 
                 on_change=update_boxes, 
-                args=(term, course), 
+                args=(term, course, 'meng_plan'), 
                 disabled=st.session_state['disable'][key],
                 value=value,
             )
