@@ -40,11 +40,17 @@ class Degree(dict):
         return courses
     
     @property
+    def terms(self):
+        terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]
+        start = terms.index(self.start_term)
+        end = self.N_terms
+        terms = terms[start:start+end]
+        return terms
+    
+    @property
     def count_per_term(self):
-        count = {}
+        count = {term: 0 for term in self.terms}
         for course in self.keys():
-            if self[course] not in count.keys():
-                count[self[course]] = 0
             count[self[course]] += 1
         return list(count.values())
     

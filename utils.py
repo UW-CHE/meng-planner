@@ -75,9 +75,10 @@ def set_program_meng(programs):
 
 
 def set_start_term_meng(terms):
-    index = terms.index(st.session_state['meng_start_term_selectbox'])
+    start = st.session_state['meng_start_term_selectbox']
+    index = terms.index(start)
     st.session_state['meng_start_term_selectbox.index'] = index
-    reset_state_meng()
+    st.session_state['meng_plan'].start_term = start
 
 
 def set_program_ug(programs):

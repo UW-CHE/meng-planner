@@ -98,12 +98,11 @@ with st.sidebar.expander('Show MEng plan', expanded=True):
     st.write(st.session_state['meng_plan'])
 
 # Check to ensure no problems are found with selections
-# overload = st.session_state['meng_plan'].overloaded_terms()
-# if np.any(overload):
-#     i = np.where(overload)[0][0]
-#     st.error(f'No more than {st.session_state['meng_plan'].max_per_term[i]} courses may be taken in term {i+1}')
-# el
-if st.session_state['meng_plan'].count_500s() > st.session_state['meng_plan'].N_required // 3:
+overload = st.session_state['meng_plan'].overloaded_terms()
+if np.any(overload):
+    i = np.where(overload)[0][0]
+    st.error(f'No more than {st.session_state['meng_plan'].max_per_term[i]} courses may be taken in term {i+1}')
+elif st.session_state['meng_plan'].count_500s() > st.session_state['meng_plan'].N_required // 3:
     N = st.session_state['meng_plan'].N_required // 3
     st.error(f'No more than {N} 500-level courses are allowed')
 elif st.session_state['meng_plan'].count_nonCHE() > st.session_state['meng_plan'].N_outside:
