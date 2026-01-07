@@ -14,19 +14,18 @@ __all__ = [
     'ug_course_schedule',
     'update_boxes',
     'reset_boxes',
+    'set_program_meng',
+    'set_start_term_meng',
+    'set_program_ug',
+    'set_start_term_ug',
 ]
 
 
 def ug_course_schedule(start_term='0'):
     with st.expander('Course Schedule', expanded=False):
-        incl_mme = st.checkbox('Include MME Courses')
-        incl_earth = st.checkbox('Include EARTH Courses')
         dfs = []
         dfs.append(pd.read_csv('./schedules/schedule_500.csv', skipinitialspace=True))
-        if incl_mme:
-            dfs.append(pd.read_csv('./schedules/schedule_MME.csv', skipinitialspace=True))
-        if incl_earth:
-            dfs.append(pd.read_csv('./schedules/schedule_EARTH.csv', skipinitialspace=True))
+        dfs.append(pd.read_csv('./schedules/schedule_TE.csv', skipinitialspace=True))
         df = pd.concat(dfs, ignore_index=True)
         df.set_index('Course', inplace=True)
         for col in df.keys():  # Remove terms prior to start date
@@ -65,6 +64,32 @@ def make_pretty(styler):
 
 def reset_state():
     reset_state_meng()
+    reset_state_ug()
+
+
+def set_program_meng(programs):
+    options = [p.name for p in programs]
+    index = options.index(st.session_state['meng_program_selectbox'])
+    st.session_state['meng_program_selectbox.index'] = index
+    reset_state_meng()
+
+
+def set_start_term_meng(terms):
+    index = terms.index(st.session_state['meng_start_term_selectbox'])
+    st.session_state['meng_start_term_selectbox.index'] = index
+    reset_state_meng()
+
+
+def set_program_ug(programs):
+    options = [p.name for p in programs]
+    index = options.index(st.session_state['ug_program_selectbox'])
+    st.session_state['ug_program_selectbox.index'] = index
+    reset_state_ug()
+
+
+def set_start_term_ug(terms):
+    index = terms.index(st.session_state['ug_start_term_selectbox'])
+    st.session_state['ug_start_term_selectbox.index'] = index
     reset_state_ug()
 
 

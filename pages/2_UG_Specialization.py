@@ -9,7 +9,19 @@ from utils import (
     add_header,
     ug_course_schedule,
     get_ug_specializations,
+    set_program_ug,
+    set_start_term_ug,
 )
+
+init = {
+    'ug_program_selectbox.index': 0,
+    'ug_start_term_selectbox.index': 2,
+}
+
+# Initialize session state
+for k, v in init.items():
+    if k not in st.session_state.keys():
+        st.session_state[k] = v
 
 st.set_page_config(
     page_title="UG Specialization Planner",
@@ -22,25 +34,31 @@ st.set_page_config(layout="wide")
 programs = get_ug_specializations()
 
 # Populate sidebar with some dropdown boxes
-program_name = st.sidebar.selectbox(
-    label='Choose UG Program', 
-    options=[p.name for p in programs],
-    on_change=reset_state_ug,
+st.sidebar.selectbox(
+    label='Choose Program', 
+    options=[p.name for p in programs], 
+    key='ug_program_selectbox',
+    on_change=set_program_ug,
+    args=(programs,),
+    index=st.session_state['ug_program_selectbox.index']
 )
+program_name = st.session_state['ug_program_selectbox']
 if ('ug_plan' not in st.session_state.keys()) or (len(st.session_state['ug_plan']) == 0):
     program = [p for p in programs if p.name == program_name]
     plan = program[0]()
     st.session_state['ug_plan'] = plan  # Store plan in state
-    # st.session_state['disable'] = defaultdict(lambda: False)
+    st.session_state['disable'] = defaultdict(lambda: False)
 
 # Deal with starting term by generating a long list of future term numbers
 terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]
 # Retrieve start term from selectbox
 st.session_state['ug_plan'].start_term = st.sidebar.selectbox(
-    label='Select UG Start Term',
+    label='Select Start Term',
     options=terms,
-    index=5,
-    on_change=reset_state_ug,
+    on_change=set_start_term_ug,
+    args=(terms,),
+    key='ug_start_term_selectbox',
+    index=st.session_state['ug_start_term_selectbox.index'],
 )
 
 # Add a reset button to side bar

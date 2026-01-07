@@ -9,7 +9,19 @@ from utils import (
     get_meng_programs,
     update_boxes,
     reset_boxes,
+    set_start_term_meng,
+    set_program_meng,
 )
+
+init = {
+    'meng_program_selectbox.index': 0,
+    'meng_start_term_selectbox.index': 5,
+}
+
+# Initialize session state
+for k, v in init.items():
+    if k not in st.session_state.keys():
+        st.session_state[k] = v
 
 st.set_page_config(
     page_title="MEng Planner",
@@ -22,11 +34,16 @@ st.set_page_config(layout="wide")
 programs = get_meng_programs()
 
 # Populate sidebar with some dropdown boxes
-program_name = st.sidebar.selectbox(
-    label='Choose MEng Program', 
+st.sidebar.selectbox(
+    label='Choose Program', 
     options=[p.name for p in programs], 
-    on_change=reset_state_meng,
+    key='meng_program_selectbox',
+    on_change=set_program_meng,
+    args=(programs,),
+    index=st.session_state['meng_program_selectbox.index']
 )
+program_name = st.session_state['meng_program_selectbox']
+
 if ('meng_plan' not in st.session_state.keys()) or (len(st.session_state['meng_plan']) == 0):
     program = [p for p in programs if p.name == program_name]
     plan = program[0]()
@@ -37,10 +54,12 @@ if ('meng_plan' not in st.session_state.keys()) or (len(st.session_state['meng_p
 terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]
 # Retrieve start term from selectbox
 st.session_state['meng_plan'].start_term = st.sidebar.selectbox(
-    label='Select MEng Start Term',
+    label='Select Start Term',
     options=terms,
-    index=5,
-    on_change=reset_state_meng,
+    on_change=set_start_term_meng,
+    args=(terms,),
+    key='meng_start_term_selectbox',
+    index=st.session_state['meng_start_term_selectbox.index'],
 )
 
 # Add a reset button to side bar
@@ -59,7 +78,7 @@ for term in cols.keys():
         add_header(term)
         for course in df_meng.index[df_meng[term] == 1]:
             mark = ' :star:' if course in st.session_state['meng_plan'].prescribed_courses else ''
-            key = 'box_'+term+course  
+            key = 'box_'+term+course
             # I think key needs to include meng and ug so they don't interfere
             # This applies to the disable flag especially
             label = course+mark
