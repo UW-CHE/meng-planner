@@ -9,9 +9,11 @@ import ug_specializations
 __all__ = [
     'make_pretty',
     'reset_state',
-    'add_header'
+    'add_header',
     'meng_course_schedule',
-    'ug_course_schedule'
+    'ug_course_schedule',
+    'update_boxes',
+    'reset_boxes',
 ]
 
 
@@ -71,7 +73,7 @@ def reset_state_meng():
         st.session_state['meng_plan'].clear()
     except KeyError:
         pass
-    reset_courses()
+    reset_boxes()
 
 
 def reset_state_ug():
@@ -79,7 +81,7 @@ def reset_state_ug():
         st.session_state['ug_plan'].clear()
     except KeyError:
         pass
-    reset_courses()
+    reset_boxes()
 
 
 def add_header(term):
@@ -112,12 +114,24 @@ def get_ug_specializations():
     return programs
 
 
-def reset_courses():
+def reset_boxes():
     for item in st.session_state.keys():
         if item.startswith('box_'):
             st.session_state[item] = False
+            st.session_state['disable'][item] = False
     try:
         del st.session_state['df_meng']
         del st.session_state['df_ug']
     except:
         pass
+
+
+def update_boxes(term, course):
+    key = 'box_'+term+course
+    for item in st.session_state.keys():
+        if item.startswith('box_') and item.endswith(course) and (item != key):
+            st.session_state['disable'][item] = not st.session_state['disable'][item]
+            if st.session_state[key] is True:
+                st.session_state['meng_plan'][course] = term
+            else:
+                _ = st.session_state['meng_plan'].pop(course, None)

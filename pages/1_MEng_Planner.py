@@ -1,12 +1,14 @@
+from collections import defaultdict
 import streamlit as st
 import pandas as pd
 import numpy as np
 from utils import (
     reset_state_meng,
-    reset_courses,
     add_header,
     meng_course_schedule,
     get_meng_programs,
+    update_boxes,
+    reset_boxes,
 )
 
 st.set_page_config(
@@ -29,6 +31,7 @@ if ('meng_plan' not in st.session_state.keys()) or (len(st.session_state['meng_p
     program = [p for p in programs if p.name == program_name]
     plan = program[0]()
     st.session_state['meng_plan'] = plan  # Store plan in state
+    st.session_state['disable'] = defaultdict(lambda: False)
 
 # Deal with starting term by generating a long list of future term numbers
 terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]
@@ -43,7 +46,7 @@ st.session_state['meng_plan'].start_term = st.sidebar.selectbox(
 # Add a reset button to side bar
 if st.sidebar.button('Reset'):
     reset_state_meng()
-    reset_courses()
+    reset_boxes()
 
 # Generate the upcoming roster of classes and show in a table
 df_meng = meng_course_schedule(st.session_state['meng_plan'].start_term)
@@ -58,15 +61,7 @@ for term in cols.keys():
             mark = ' :star:' if course in st.session_state['meng_plan'].prescribed_courses else ''
             key = 'box_'+term+course
             label = course+mark
-            if course in st.session_state['meng_plan'].keys() and st.session_state['meng_plan'][course] != term:
-                st.session_state[key] = False
-                st.checkbox(label=label, key=key, disabled=True)
-            else:
-                val = st.checkbox(label=label, key=key)
-                if val:
-                    st.session_state['meng_plan'][course] = term
-                else:
-                    _ = st.session_state['meng_plan'].pop(course, None)
+            st.checkbox(label=label, key=key, on_change=update_boxes, args=(term, course), disabled=st.session_state['disable'][key])
 
 st.sidebar.divider()
 with st.sidebar.expander('Show MEng plan', expanded=True):
