@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 from importlib import import_module
 import meng_options
+import ug_specializations
 
 
 __all__ = [
@@ -61,18 +62,16 @@ def make_pretty(styler):
 
 
 def reset_state():
-    for k in st.session_state.keys():
-        if k.startswith('checkbox'):
-            st.session_state[k] = False
-    # reset_state_meng()
-    # reset_state_ug()
+    reset_state_meng()
+    reset_state_ug()
 
 
 def reset_state_meng():
     try:
-        st.session_state['plan'].clear()
+        st.session_state['meng_plan'].clear()
     except KeyError:
         pass
+    reset_courses()
 
 
 def reset_state_ug():
@@ -80,6 +79,7 @@ def reset_state_ug():
         st.session_state['ug_plan'].clear()
     except KeyError:
         pass
+    reset_courses()
 
 
 def add_header(term):
@@ -102,11 +102,22 @@ def get_meng_programs():
     return programs
 
 
+def get_ug_specializations():
+    programs = []
+    for n in dir(ug_specializations):
+        if not n.startswith('_'):
+            globals()[n] = getattr(import_module('ug_specializations'), n)
+            programs.append(globals()[n])
+    programs = [p for p in programs if p.name]
+    return programs
+
+
 def reset_courses():
     for item in st.session_state.keys():
         if item.startswith('box_'):
             st.session_state[item] = False
     try:
-        del st.session_state['df_taken']
+        del st.session_state['df_meng']
+        del st.session_state['df_ug']
     except:
         pass

@@ -1,87 +1,85 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from importlib import import_module
 from utils import (
-    make_pretty,
     reset_state_ug,
-    reset_state,
+    reset_courses,
     add_header,
     ug_course_schedule,
+    get_ug_specializations,
 )
-import ug_specializations
 
-
+st.set_page_config(
+    page_title="UG Specialization Planner",
+    page_icon=":calendar:",
+)
 st.title(":calendar: UG Specialization Planner")
 st.set_page_config(layout="wide")
 
-# Import all options into list of programs
-programs = []
-for n in dir(ug_specializations):
-    if not n.startswith('_'):
-        globals()[n] = getattr(import_module('ug_specializations'), n)
-        programs.append(globals()[n])
-# Generate selectbox of programs
+# Generate list of available programs
+programs = get_ug_specializations()
+
+# Populate sidebar with some dropdown boxes
 program_name = st.sidebar.selectbox(
-    label='Choose Specialization', 
-    options=[p.name for p in programs if p.name], 
-    # on_change=reset_state_ug,
+    label='Choose UG Program', 
+    options=[p.name for p in programs],
+    on_change=reset_state_ug,
 )
-# Extract selected program
-program = [p for p in programs if p.name == program_name]
-plan = program[0]()  # Instantiate plan object
-st.session_state['ug_plan'] = plan  # Store plan in state
+if ('ug_plan' not in st.session_state.keys()) or (len(st.session_state['ug_plan']) == 0):
+    program = [p for p in programs if p.name == program_name]
+    plan = program[0]()
+    st.session_state['ug_plan'] = plan  # Store plan in state
 
-
+# Deal with starting term by generating a long list of future term numbers
 terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]
 # Retrieve start term from selectbox
-plan.start_term = st.sidebar.selectbox(
-    label='Select Start Term', 
-    options=terms, 
-    index=5, 
-    # on_change=reset_state_ug,
+st.session_state['ug_plan'].start_term = st.sidebar.selectbox(
+    label='Select UG Start Term',
+    options=terms,
+    index=5,
+    on_change=reset_state_ug,
 )
 
 # Add a reset button to side bar
 if st.sidebar.button('Reset'):
-    reset_state()
+    reset_state_ug()
+    reset_courses()
 
 # Generate the upcoming roster of classes and show in a table
-df = ug_course_schedule()
+df_ug = ug_course_schedule(st.session_state['ug_plan'].start_term)
+df_ug = df_ug.iloc[:, :st.session_state['ug_plan'].N_terms]
 
-# Generate the columns for each term
-start_j = terms.index(plan.start_term)
-cols = st.columns(len(plan.max_per_term))
-i = 1000  # This is used to generate a unique key for each checkbox
-for j, col in enumerate(cols):
-    term = terms[start_j + j]
-    plan[term] = []
-    with col:
+cols = st.columns(st.session_state['ug_plan'].N_terms)
+cols = {term: cols[i] for i, term in enumerate(df_ug.keys())}
+for term in cols.keys():
+    with cols[term]:
         add_header(term)
-        with st.container(border=True):
-            for item in df.index:
-                if (df.loc[item][term]) and (item not in plan.prescribed_courses):
-                    if item in plan.courses:
-                        st.checkbox(item, key=f'checkbox_{i}', value=True, disabled=True)
-                    else:
-                        if st.checkbox(item, value=False, key=f'checkbox_{i}'):
-                            plan[term].append(item)
-                    i += 1
-
-# Check to ensure no problems are found with selections
-overload = np.array(plan.count_per_term) > np.array(plan.max_per_term)
-if np.any(overload):
-    i = np.where(overload)[0][0]
-    st.error(f'No more than {plan.max_per_term[i]} courses may be taken in term {i+1}')
-else:  # Count the number of courses and generate progress bars and messages
-    pcol1 = st.columns(2)
-    if len(plan.required) >= 0:
-        with pcol1[0]:
-            pbar1 = st.progress(0)
-            N = 4
-            pbar1.progress(min(N, len(plan.courses))/N)
-        with pcol1[1]:
-            if (len(plan.courses) >= 4):
-                st.success('Specialization achieved!')
+        for course in df_ug.index[df_ug[term] == 1]:
+            mark = ' :star:' if course in st.session_state['ug_plan'].prescribed_courses else ''
+            key = 'box_'+term+course
+            label = course+mark
+            if course in st.session_state['ug_plan'].keys() and st.session_state['ug_plan'][course] != term:
+                st.session_state[key] = False
+                st.checkbox(label=label, key=key, disabled=True)
             else:
-                st.error('Specialization requirements not met')
+                val = st.checkbox(label=label, key=key)
+                if val:
+                    st.session_state['ug_plan'][course] = term
+                else:
+                    _ = st.session_state['ug_plan'].pop(course, None)
+
+st.sidebar.divider()
+with st.sidebar.expander('Show UG plan', expanded=True):
+    st.write('Course : Term')
+    st.write(st.session_state['ug_plan'])
+
+pcol1 = st.columns(2, vertical_alignment='center')
+with pcol1[0]:
+    pbar1 = st.progress(0)
+    N = 4
+    pbar1.progress(min(N, st.session_state['ug_plan'].specialization_count())/N)
+with pcol1[1]:
+    if st.session_state['ug_plan'].specialization_achieved():
+        st.success('Specialization achieved!')
+    else:
+        st.error('Specialization requirements not met')

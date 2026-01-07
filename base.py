@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
 
 __all__ = [
@@ -28,6 +29,10 @@ class Degree(dict):
     def prescribed_courses(self):
         courses = self.required + self.optional
         return courses
+    
+    @property
+    def N_terms(self):
+        return len(self.max_per_term)
 
     @property
     def courses(self):
@@ -41,7 +46,11 @@ class Degree(dict):
             if self[course] not in count.keys():
                 count[self[course]] = 0
             count[self[course]] += 1
-        return count
+        return list(count.values())
+    
+    def overloaded_terms(self):
+        overloaded = np.array(self.count_per_term) > np.array(self.max_per_term)
+        return overloaded
 
     def degree_achieved(self):
         return len(self.courses) >= self.N_required
@@ -71,4 +80,5 @@ class Specialization(Degree):
     def specialization_achieved(self):
         flag1 = set(self.courses).intersection(self.required) == set(self.required)
         flag2 = len(set(self.courses).intersection(self.optional)) >= 2
-        return flag1 and flag2
+        flag3 = len(set(self.courses).intersection(self.required + self.optional)) >= 4
+        return flag1 and flag2 and flag3
