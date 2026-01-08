@@ -24,12 +24,12 @@ class Degree(dict):
             return super().__getitem__(key)
         else:
             return False
-        
+
     @property
     def prescribed_courses(self):
         courses = self.required + self.optional
         return courses
-    
+
     @property
     def N_terms(self):
         return len(self.max_per_term)
@@ -38,7 +38,7 @@ class Degree(dict):
     def courses(self):
         courses = list(self.keys())
         return courses
-    
+
     @property
     def terms(self):
         terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]
@@ -46,14 +46,14 @@ class Degree(dict):
         end = self.N_terms
         terms = terms[start:start+end]
         return terms
-    
+
     @property
     def count_per_term(self):
         count = {term: 0 for term in self.terms}
         for course in self.keys():
             count[self[course]] += 1
         return list(count.values())
-    
+
     def overloaded_terms(self):
         overloaded = np.array(self.count_per_term) > np.array(self.max_per_term)
         return overloaded
@@ -64,7 +64,7 @@ class Degree(dict):
     def count_500s(self):
         count = 0
         for course in self.keys():
-            if course[3] == '5':
+            if course[-3] == '5':
                 count += 1
         return count
     
@@ -74,7 +74,7 @@ class Degree(dict):
             if not (course.startswith("CHE") or course.startswith("NANO")):
                 count += 1
         return count
-    
+
 
 class Specialization(Degree):
 

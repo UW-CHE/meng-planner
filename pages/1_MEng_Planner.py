@@ -11,6 +11,7 @@ from utils import (
     reset_boxes,
     set_start_term_meng,
     set_program_meng,
+    update_text_field,
 )
 
 init = {
@@ -91,6 +92,20 @@ for term in cols.keys():
                 disabled=st.session_state['disable'][key],
                 value=value,
             )
+        # Add custom courses
+        if 'text_'+term+'custom.cache' not in st.session_state.keys():
+            st.session_state['text_'+term+'custom.cache'] = ''
+        value = st.session_state['text_'+term+'custom.cache']
+        st.text_input(
+            label='Custom',
+            key='text_'+term+'custom',
+            value=value,
+            on_change=update_text_field,
+            args=(term, 'meng_plan'),
+            width=100,
+            label_visibility='collapsed',
+            placeholder='Custom Course',
+        )
 
 st.sidebar.divider()
 with st.sidebar.expander('Show MEng plan', expanded=True):
@@ -130,5 +145,3 @@ else:  # Count the number of courses and generate progress bars and messages
             st.success('Degree requirements achieved!')
         else:
             st.error('Degree requirements not met')
-
-

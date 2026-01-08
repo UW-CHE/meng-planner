@@ -18,6 +18,7 @@ __all__ = [
     'set_start_term_meng',
     'set_program_ug',
     'set_start_term_ug',
+    'update_text_field',
 ]
 
 
@@ -145,11 +146,8 @@ def reset_boxes():
         if item.startswith('box_'):
             st.session_state[item] = False
             st.session_state['disable'][item] = False
-    try:
-        del st.session_state['df_meng']
-        del st.session_state['df_ug']
-    except:
-        pass
+    _ = st.session_state.pop('df_meng', None)
+    _ = st.session_state.pop('df_ug', None)
 
 
 def update_boxes(term, course, plan):
@@ -161,3 +159,16 @@ def update_boxes(term, course, plan):
         st.session_state[plan][course] = term
     else:
         _ = st.session_state[plan].pop(course, None)
+
+
+def update_text_field(term, plan):
+    course = st.session_state['text_'+term+'custom']
+    old_value = st.session_state['text_'+term+'custom.cache']
+    if course == '':
+        _ = st.session_state[plan].pop(old_value, None)
+    elif course != old_value:
+        _ = st.session_state[plan].pop(old_value, None)
+        st.session_state[plan][course] = term
+    elif course not in st.session_state[plan]:
+        st.session_state[plan][course] = term
+    st.session_state['text_'+term+'custom.cache'] = course
