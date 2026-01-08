@@ -104,6 +104,9 @@ with st.sidebar.expander('Show UG plan', expanded=True):
     st.write('Course : Term')
     st.write(st.session_state['ug_plan'])
 
+if st.session_state['ug_plan'].count_nonCHE() > st.session_state['ug_plan'].N_outside:
+    N = st.session_state['ug_plan'].N_outside
+    st.error(f'No more than {N} courses can be from outside CHE')
 pcol1 = st.columns(2, vertical_alignment='center')
 with pcol1[0]:
     pbar1 = st.progress(0)

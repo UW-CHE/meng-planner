@@ -123,6 +123,8 @@ elif st.session_state['meng_plan'].count_500s() > st.session_state['meng_plan'].
 elif st.session_state['meng_plan'].count_nonCHE() > st.session_state['meng_plan'].N_outside:
     N = st.session_state['meng_plan'].N_outside
     st.error(f'No more than {N} courses can be from outside CHE or NANO')
+elif st.session_state['meng_plan'].count_300s_and_400s() > 0:
+    st.error('No 300 or 400 level courses can be used toward MEng')
 else:  # Count the number of courses and generate progress bars and messages
     if hasattr(st.session_state['meng_plan'], 'specialization_count'):
         pcol1 = st.columns(2, vertical_alignment='center')

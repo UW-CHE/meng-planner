@@ -64,14 +64,25 @@ class Degree(dict):
     def count_500s(self):
         count = 0
         for course in self.keys():
-            if course[-3] == '5':
+            num = ''.join([i for i in course if i.isdigit()])
+            if num[0] == '5':
+                count += 1
+        return count
+    
+    def count_300s_and_400s(self):
+        count = 0
+        for course in self.keys():
+            num = ''.join([i for i in course if i.isdigit()])
+            if num[0] in ['3', '4']:
                 count += 1
         return count
     
     def count_nonCHE(self):
         count = 0
         for course in self.courses:
-            if not (course.startswith("CHE") or course.startswith("NANO")):
+            num = ''.join([i for i in course if i.isdigit()])
+            dept = course.split(num)[0]
+            if dept not in ['CHE', 'NANO']:
                 count += 1
         return count
 
