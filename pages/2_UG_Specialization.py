@@ -11,18 +11,11 @@ from utils import (
     get_ug_specializations,
     set_program_ug,
     set_start_term_ug,
-    deactivate_boxes,
+    initialize_defaults,
 )
 
-init = {
-    'ug_program_selectbox.index': 0,
-    'ug_start_term_selectbox.index': 2,
-}
-
-# Initialize session state
-for k, v in init.items():
-    if k not in st.session_state.keys():
-        st.session_state[k] = v
+if 'initialized' not in st.session_state.keys():
+    initialize_defaults()
 
 st.set_page_config(
     page_title="UG Specialization Planner",
@@ -48,7 +41,6 @@ if ('ug_plan' not in st.session_state.keys()) or (len(st.session_state['ug_plan'
     program = [p for p in programs if p.name == program_name]
     plan = program[0]()
     st.session_state['ug_plan'] = plan  # Store plan in state
-    st.session_state['disable_ug'] = defaultdict(lambda: False)
 
 # Deal with starting term by generating a long list of future term numbers
 terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]

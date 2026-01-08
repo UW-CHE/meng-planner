@@ -4,6 +4,7 @@ import pandas as pd
 from importlib import import_module
 import meng_options
 import ug_specializations
+from collections import defaultdict
 
 
 __all__ = [
@@ -20,7 +21,26 @@ __all__ = [
     'set_start_term_ug',
     'update_text_field',
     'deactivate_boxes',
+    'initialize_defaults',
 ]
+
+
+def initialize_defaults():
+    init = {
+        'meng_program_selectbox.index': 0,
+        'meng_start_term_selectbox.index': 5,
+        'ug_program_selectbox.index': 0,
+        'ug_start_term_selectbox.index': 2,
+        'disable': defaultdict(lambda: False),
+        'disable_ug': defaultdict(lambda: False),
+        'ug_plan': {},
+        'meng_plan': {},
+        'initialized': True,
+    }
+    # Initialize session state
+    for k, v in init.items():
+        if k not in st.session_state.keys():
+            st.session_state[k] = v
 
 
 def ug_course_schedule(start_term='0'):
@@ -171,9 +191,10 @@ def update_boxes(term, course, plan):
     deactivate_boxes(term, course, plan)
 
 
-def update_text_field(term, plan):
-    course = st.session_state['text_'+term+'custom']
-    old_value = st.session_state['text_'+term+'custom.cache']
+def update_text_field(key, plan):
+    course = st.session_state[key]
+    term = key.split('_')[1]
+    old_value = st.session_state[f'{key}.cache']
     if course == '':
         _ = st.session_state[plan].pop(old_value, None)
     elif course != old_value:
@@ -181,4 +202,4 @@ def update_text_field(term, plan):
         st.session_state[plan][course] = term
     elif course not in st.session_state[plan]:
         st.session_state[plan][course] = term
-    st.session_state['text_'+term+'custom.cache'] = course
+    st.session_state[f'{key}.cache'] = course

@@ -1,4 +1,8 @@
 import streamlit as st
+from utils import initialize_defaults
+
+if 'initialized' not in st.session_state.keys():
+    initialize_defaults()
 
 st.title("UW CHE MEng Planner")
 st.markdown("### Welcome to the the planning tool")
@@ -14,3 +18,4 @@ MEng program. This information is entered through the
 **UG Specialization** link in the side bar.
 """
 st.markdown(instructions)
+

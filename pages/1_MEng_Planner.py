@@ -12,18 +12,11 @@ from utils import (
     set_start_term_meng,
     set_program_meng,
     update_text_field,
-    deactivate_boxes,
+    initialize_defaults,
 )
 
-init = {
-    'meng_program_selectbox.index': 0,
-    'meng_start_term_selectbox.index': 5,
-}
-
-# Initialize session state
-for k, v in init.items():
-    if k not in st.session_state.keys():
-        st.session_state[k] = v
+if 'initialized' not in st.session_state.keys():
+    initialize_defaults()
 
 st.set_page_config(
     page_title="MEng Planner",
@@ -49,7 +42,6 @@ if ('meng_plan' not in st.session_state.keys()) or (len(st.session_state['meng_p
     program = [p for p in programs if p.name == program_name]
     plan = program[0]()
     st.session_state['meng_plan'] = plan  # Store plan in state
-    st.session_state['disable'] = defaultdict(lambda: False)
 
 # Deal with starting term by generating a long list of future term numbers
 terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]
@@ -80,12 +72,16 @@ for i, term in enumerate(cols.keys()):
         for course in df_meng.index[df_meng[term] == 1]:
             mark = ' :star:' if course in st.session_state['meng_plan'].prescribed_courses else ''
             key = 'box_'+term+course
-            # I think key needs to include meng and ug so they don't interfere
-            # This applies to the disable flag especially
             label = course+mark
             value = st.session_state['meng_plan'][course] == term
+            # Disable boxes in coop terms
             if st.session_state['meng_plan'].max_per_term[i] == 0:
                 st.session_state['disable'][key] = True
+            # Disable boxes if taken during UG
+            if course in st.session_state['ug_plan'].keys():
+                st.session_state['disable'][key] = True
+                st.session_state[key] = False
+                _ = st.session_state['meng_plan'].pop(course, None)
             st.checkbox(
                 label=label,
                 key=key,
@@ -95,19 +91,21 @@ for i, term in enumerate(cols.keys()):
                 value=value,
             )
         # Add custom courses
-        if 'text_'+term+'custom.cache' not in st.session_state.keys():
-            st.session_state['text_'+term+'custom.cache'] = ''
-        value = st.session_state['text_'+term+'custom.cache']
-        st.text_input(
-            label='Custom',
-            key='text_'+term+'custom',
-            value=value,
-            on_change=update_text_field,
-            args=(term, 'meng_plan'),
-            width=100,
-            label_visibility='collapsed',
-            placeholder='Custom',
-        )
+        for j in range(2):
+            key = f'text_{term}_custom_{j}'
+            if f'{key}.cache' not in st.session_state.keys():
+                st.session_state[f'{key}.cache'] = ''
+            value = st.session_state[f'{key}.cache']
+            st.text_input(
+                label='Custom',
+                key=key,
+                value=value,
+                on_change=update_text_field,
+                args=(key, 'meng_plan'),
+                width=100,
+                label_visibility='collapsed',
+                placeholder='Custom',
+            )
 
 st.sidebar.divider()
 with st.sidebar.expander('Show MEng plan', expanded=True):
