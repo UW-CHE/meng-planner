@@ -114,11 +114,11 @@ def reset_state_ug():
 
 def add_header(term):
     if term.endswith('9'):
-        st.header("Fall :maple_leaf:")
+        st.markdown("### Fall :maple_leaf:")
     elif term.endswith('5'):
-        st.header("Spring :sunflower:")
+        st.markdown("### Spring :sunflower:")
     elif term.endswith('1'):
-        st.header("Winter :snowflake:")
+        st.markdown("### Winter :snowflake:")
     st.markdown(f"**Term: {term}**")
 
 
@@ -151,25 +151,24 @@ def reset_boxes():
     _ = st.session_state.pop('df_ug', None)
 
 
-def deactivate_boxes(plan):
-    for course in st.session_state[plan].keys():
-        term = st.session_state[plan][course]
-        key = 'box_'+term+course
-        for item in st.session_state.keys():
-            if item.startswith('box_') and item.endswith(course) and (item != key):
-                if key in st.session_state.keys():
-                    st.session_state['disable'][item] = st.session_state[key]
-                else:
-                    st.session_state['disable'][item] = False
+def deactivate_boxes(term, course, plan):
+    plan = '_ug' if plan == 'ug_plan' else ''
+    key = 'box_'+term+course
+    for item in st.session_state.keys():
+        if item.startswith('box_') and item.endswith(course) and (item != key):
+            if key in st.session_state.keys():
+                st.session_state['disable'+plan][item] = st.session_state[key]
+            else:
+                st.session_state['disable'+plan][item] = False
 
 
 def update_boxes(term, course, plan):
     key = 'box_'+term+course
-    deactivate_boxes(plan)
     if st.session_state[key] is True:
         st.session_state[plan][course] = term
     else:
         _ = st.session_state[plan].pop(course, None)
+    deactivate_boxes(term, course, plan)
 
 
 def update_text_field(term, plan):

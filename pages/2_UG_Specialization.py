@@ -48,7 +48,7 @@ if ('ug_plan' not in st.session_state.keys()) or (len(st.session_state['ug_plan'
     program = [p for p in programs if p.name == program_name]
     plan = program[0]()
     st.session_state['ug_plan'] = plan  # Store plan in state
-    st.session_state['disable'] = defaultdict(lambda: False)
+    st.session_state['disable_ug'] = defaultdict(lambda: False)
 
 # Deal with starting term by generating a long list of future term numbers
 terms = ['1' + f"{25+i}" + j for i in range(6) for j in ['1', '5', '9']]
@@ -81,13 +81,12 @@ for term in cols.keys():
             key = 'box_'+term+course
             label = course+mark
             value = st.session_state['ug_plan'][course] == term
-            deactivate_boxes('ug_plan')
             st.checkbox(
                 label=label, 
                 key=key, 
                 on_change=update_boxes, 
                 args=(term, course, 'ug_plan'), 
-                disabled=st.session_state['disable'][key],
+                disabled=st.session_state['disable_ug'][key],
                 value=value,
             )
 

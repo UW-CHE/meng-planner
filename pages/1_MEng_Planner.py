@@ -74,7 +74,7 @@ df_meng = df_meng.iloc[:, :st.session_state['meng_plan'].N_terms]
 
 cols = st.columns(st.session_state['meng_plan'].N_terms)
 cols = {term: cols[i] for i, term in enumerate(df_meng.keys())}
-for term in cols.keys():
+for i, term in enumerate(cols.keys()):
     with cols[term]:
         add_header(term)
         for course in df_meng.index[df_meng[term] == 1]:
@@ -84,7 +84,8 @@ for term in cols.keys():
             # This applies to the disable flag especially
             label = course+mark
             value = st.session_state['meng_plan'][course] == term
-            deactivate_boxes('meng_plan')
+            if st.session_state['meng_plan'].max_per_term[i] == 0:
+                st.session_state['disable'][key] = True
             st.checkbox(
                 label=label,
                 key=key,
