@@ -12,6 +12,7 @@ from utils import (
     set_program_ug,
     set_start_term_ug,
     initialize_defaults,
+    update_text_field,
 )
 
 if 'initialized' not in st.session_state.keys():
@@ -80,6 +81,22 @@ for term in cols.keys():
                 args=(term, course, 'ug_plan'), 
                 disabled=st.session_state['disable_ug'][key],
                 value=value,
+            )
+                # Add custom courses
+        for j in range(2):
+            key = f'text_{term}_custom_ug_{j}'
+            if f'{key}.cache' not in st.session_state.keys():
+                st.session_state[f'{key}.cache'] = ''
+            value = st.session_state[f'{key}.cache']
+            st.text_input(
+                label='Custom',
+                key=key,
+                value=value,
+                on_change=update_text_field,
+                args=(key, 'ug_plan'),
+                width=100,
+                label_visibility='collapsed',
+                placeholder='Custom',
             )
 
 st.sidebar.divider()
