@@ -11,6 +11,7 @@ from utils import (
     get_ug_specializations,
     set_program_ug,
     set_start_term_ug,
+    deactivate_boxes,
 )
 
 init = {
@@ -79,7 +80,8 @@ for term in cols.keys():
             mark = ' :star:' if course in st.session_state['ug_plan'].prescribed_courses else ''
             key = 'box_'+term+course
             label = course+mark
-            value = st.session_state['meng_plan'][course] == term
+            value = st.session_state['ug_plan'][course] == term
+            deactivate_boxes('ug_plan')
             st.checkbox(
                 label=label, 
                 key=key, 

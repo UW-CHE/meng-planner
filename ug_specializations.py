@@ -5,7 +5,7 @@ from base import (
 
 class EES(Specialization):
     name = 'Energy and Environmental Systems and Processes'
-    max_per_term = [2, 2, 2, 2, 2, 2]
+    max_per_term = [2, 2, 2, 2, 2]
     N_required = 4
     required = []
     optional = [
@@ -31,7 +31,7 @@ class EES(Specialization):
 
 class PSE(Specialization):
     name = 'Chemical Process Modelling, Optimization and Control'
-    max_per_term = [2, 2, 2, 2, 2, 2]
+    max_per_term = [2, 2, 2, 2, 2]
     N_required = 4
     required = []
     optional = [
@@ -57,7 +57,7 @@ class PSE(Specialization):
 
 class MMP(Specialization):
     name = 'Materials and Manufacturing Processes'
-    max_per_term = [2, 2, 2, 2, 2, 2]
+    max_per_term = [2, 2, 2, 2, 2]
     N_required = 4
     required = []
     optional = [

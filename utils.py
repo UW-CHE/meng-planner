@@ -19,6 +19,7 @@ __all__ = [
     'set_program_ug',
     'set_start_term_ug',
     'update_text_field',
+    'deactivate_boxes',
 ]
 
 
@@ -150,11 +151,21 @@ def reset_boxes():
     _ = st.session_state.pop('df_ug', None)
 
 
+def deactivate_boxes(plan):
+    for course in st.session_state[plan].keys():
+        term = st.session_state[plan][course]
+        key = 'box_'+term+course
+        for item in st.session_state.keys():
+            if item.startswith('box_') and item.endswith(course) and (item != key):
+                if key in st.session_state.keys():
+                    st.session_state['disable'][item] = st.session_state[key]
+                else:
+                    st.session_state['disable'][item] = False
+
+
 def update_boxes(term, course, plan):
     key = 'box_'+term+course
-    for item in st.session_state.keys():
-        if item.startswith('box_') and item.endswith(course) and (item != key):
-            st.session_state['disable'][item] = st.session_state[key]
+    deactivate_boxes(plan)
     if st.session_state[key] is True:
         st.session_state[plan][course] = term
     else:

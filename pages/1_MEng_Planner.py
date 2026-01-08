@@ -12,6 +12,7 @@ from utils import (
     set_start_term_meng,
     set_program_meng,
     update_text_field,
+    deactivate_boxes,
 )
 
 init = {
@@ -44,7 +45,6 @@ st.sidebar.selectbox(
     index=st.session_state['meng_program_selectbox.index']
 )
 program_name = st.session_state['meng_program_selectbox']
-
 if ('meng_plan' not in st.session_state.keys()) or (len(st.session_state['meng_plan']) == 0):
     program = [p for p in programs if p.name == program_name]
     plan = program[0]()
@@ -84,11 +84,12 @@ for term in cols.keys():
             # This applies to the disable flag especially
             label = course+mark
             value = st.session_state['meng_plan'][course] == term
+            deactivate_boxes('meng_plan')
             st.checkbox(
-                label=label, 
-                key=key, 
-                on_change=update_boxes, 
-                args=(term, course, 'meng_plan'), 
+                label=label,
+                key=key,
+                on_change=update_boxes,
+                args=(term, course, 'meng_plan'),
                 disabled=st.session_state['disable'][key],
                 value=value,
             )
@@ -104,7 +105,7 @@ for term in cols.keys():
             args=(term, 'meng_plan'),
             width=100,
             label_visibility='collapsed',
-            placeholder='Custom Course',
+            placeholder='Custom',
         )
 
 st.sidebar.divider()
