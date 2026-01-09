@@ -82,7 +82,7 @@ for term in cols.keys():
                 disabled=st.session_state['disable_ug'][key],
                 value=value,
             )
-                # Add custom courses
+        # Add custom courses
         for j in range(2):
             key = f'text_{term}_custom_ug_{j}'
             if f'{key}.cache' not in st.session_state.keys():

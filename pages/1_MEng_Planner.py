@@ -90,6 +90,7 @@ for i, term in enumerate(cols.keys()):
                 disabled=st.session_state['disable'][key],
                 value=value,
             )
+
         # Add custom courses
         for j in range(2):
             key = f'text_{term}_custom_{j}'
