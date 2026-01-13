@@ -61,7 +61,7 @@ if st.sidebar.button('Reset'):
     reset_boxes()
 
 # Generate the upcoming roster of classes and show in a table
-df_ug = ug_course_schedule(st.session_state['ug_plan'].start_term)
+df_ug = ug_course_schedule(st.session_state['ug_plan'])
 df_ug = df_ug.iloc[:, :st.session_state['ug_plan'].N_terms]
 
 cols = st.columns(st.session_state['ug_plan'].N_terms)

@@ -61,7 +61,7 @@ if st.sidebar.button('Reset'):
     reset_boxes()
 
 # Generate the upcoming roster of classes and show in a table
-df_meng = meng_course_schedule(st.session_state['meng_plan'].start_term)
+df_meng = meng_course_schedule(st.session_state['meng_plan'])
 df_meng = df_meng.iloc[:, :st.session_state['meng_plan'].N_terms]
 
 cols = st.columns(st.session_state['meng_plan'].N_terms)
@@ -70,9 +70,10 @@ for i, term in enumerate(cols.keys()):
     with cols[term]:
         add_header(term)
         for course in df_meng.index[df_meng[term] == 1]:
-            mark = ' :star:' if course in st.session_state['meng_plan'].prescribed_courses else ''
+            label = course
+            label = f"{label}{' :star:'}" if course in st.session_state['meng_plan'].optional else label
+            label = f"{label}{':star: :exclamation:'}" if course in st.session_state['meng_plan'].required else label
             key = 'box_'+term+course
-            label = course+mark
             value = st.session_state['meng_plan'][course] == term
             # Disable boxes in coop terms
             if st.session_state['meng_plan'].max_per_term[i] == 0:

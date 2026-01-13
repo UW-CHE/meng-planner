@@ -43,7 +43,7 @@ def initialize_defaults():
             st.session_state[k] = v
 
 
-def ug_course_schedule(start_term='0'):
+def ug_course_schedule(plan):
     with st.expander('Course Schedule', expanded=False):
         dfs = []
         dfs.append(pd.read_csv('./schedules/schedule_500.csv', skipinitialspace=True))
@@ -51,16 +51,20 @@ def ug_course_schedule(start_term='0'):
         df = pd.concat(dfs, ignore_index=True)
         df.set_index('Course', inplace=True)
         for col in df.keys():  # Remove terms prior to start date
-            if col < start_term:
+            if col < plan.start_term:
                 del df[col]
         st.dataframe(df.style.pipe(make_pretty))
         return df
 
 
-def meng_course_schedule(start_term='0'):
+def meng_course_schedule(plan):
     with st.expander('Course Schedule', expanded=False):
-        incl_seed = st.checkbox('Include SEED Courses')
-        incl_hlth = st.checkbox('Include HLTH Courses')
+        incl_hlth = True if 'Health' in plan.name else False
+        incl_seed = True if 'Sustainable' in plan.name else False
+        incl_be = True if 'Entrepreneurship' in plan.name else False
+        # incl_seed = st.checkbox('Include SEED Courses')
+        # incl_hlth = st.checkbox('Include HEALTH Courses')
+        # incl_be = st.checkbox('Include CONRAD Courses')
         dfs = []
         dfs.append(pd.read_csv('./schedules/schedule_500.csv', skipinitialspace=True))
         dfs.append(pd.read_csv('./schedules/schedule_600.csv', skipinitialspace=True))
@@ -68,10 +72,12 @@ def meng_course_schedule(start_term='0'):
             dfs.append(pd.read_csv('./schedules/schedule_HLTH.csv', skipinitialspace=True))
         if incl_seed:
             dfs.append(pd.read_csv('./schedules/schedule_SEED.csv', skipinitialspace=True))
+        if incl_be:
+            dfs.append(pd.read_csv('./schedules/schedule_BE.csv', skipinitialspace=True))
         df = pd.concat(dfs, ignore_index=True)
         df.set_index('Course', inplace=True)
         for col in df.keys():  # Remove terms prior to start date
-            if col < start_term:
+            if col < plan.start_term:
                 del df[col]
         st.dataframe(df.style.pipe(make_pretty))
         return df

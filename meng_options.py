@@ -32,7 +32,7 @@ class MEngBio(Specialization):
     name = 'MEng in Biological Engineering'
     max_per_term = [3, 3, 3]
     N_required = 8
-    required = ['CHE5620', 'CHE660', 'CHE663']
+    required = ['CHE562', 'CHE660', 'CHE663']
     optional = ['CHE561', 'CHE564']
 
 
